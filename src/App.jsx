@@ -4,35 +4,28 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
+// Admin Pages
+import CategoryPage from './pages/admin/ManageCategory';
+import FoodItemsPage from './pages/admin/FooditemsPage';
+import ManageOrders from './pages/admin/ManageOrders';
+// import ManageInvoices from './pages/invoices/ManageInvoices';
 
-import AddCustomer from './pages/customers/AddCustomer';
-import ManageCustomers from './pages/customers/ManageCustomers';
+// User Pages
+import Menu from './pages/user/Menu';
+import Cart from './pages/user/Cart';
+import OrderHistory from './pages/user/OrderHistory';
+import CheckoutPage from './pages/CheckoutPage';
+import UserLayout from './layouts/UserLayout';
 
+export const API_URL = 'http://localhost:8000/api'; 
 
-import AddFoodCategory from './pages/food-category/AddFoodCategory';
-import ManageFoodCategories from './pages/food-category/ManageFoodCategories';
-
-
-import AddFood from './pages/food/AddFood';
-import ManageFood from './pages/food/ManageFood';
-
-
-import CreateInvoice from './pages/invoices/CreateInvoice';
-import ManageInvoices from './pages/invoices/ManageInvoices';
-
-
-import Head from './components/head';
-
-
-const UserPage = () => <div className="text-center mt-20 text-2xl">Welcome userrrr</div>;
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
 
-
-
   useEffect(() => {
+    // Check for authentication status when app loads
     const auth = localStorage.getItem('isAuthenticated') === 'true';
     const role = localStorage.getItem('userRole') || '';
 
@@ -40,50 +33,92 @@ function App() {
     setUserRole(role);
   }, []);
 
+  // NotFound component for 404 pages
+  const NotFound = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-lime-600 mb-4">404</h1>
+        <p className="text-xl text-gray-700 mb-6">Page not found</p>
+        <button 
+          onClick={() => window.history.back()} 
+          className="bg-lime-600 text-white px-6 py-2 rounded-lg hover:bg-lime-700 transition"
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <BrowserRouter>
       <Routes>
-        
+        {/* Public Route */}
         <Route
           path="/login"
-          element={<Login setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />}
+          element={
+            isAuthenticated ? (
+              <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+            ) : (
+              <Login setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />
+            )
+          }
         />
 
-       
-        {isAuthenticated && userRole === 'user' && (
-          <Route path="/user-page" element={<UserPage />} />
-        )}
+        {/* User Routes */}
+        <Route path="/" element={
+          isAuthenticated && userRole === 'user' ? (
+            <UserLayout />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }>
+          <Route index element={<Navigate to="/menu" replace />} />
+          <Route path="menu" element={<Menu />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="orders" element={<OrderHistory />} />
+        </Route>
 
-        
-        {isAuthenticated && userRole === 'admin' && (
-          <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+        {/* Checkout route - separate from UserLayout for a cleaner checkout experience */}
+        <Route
+          path="/checkout"
+          element={
+            isAuthenticated && userRole === 'user' ? (
+              <CheckoutPage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
-            
-            <Route path="customers/add" element={<AddCustomer />} />
-            <Route path="customers/manage" element={<ManageCustomers />} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={
+          isAuthenticated && userRole === 'admin' ? (
+            <DashboardLayout />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          
+          <Route path="categories" element={<CategoryPage />} />
+          <Route path="food-items" element={<FoodItemsPage />} />
+          <Route path="orders" element={<ManageOrders />} />
+          {/* <Route path="invoices" element={<ManageInvoices />} /> */}
+        </Route>
 
-           
-            <Route path="food-category/add" element={<AddFoodCategory />} />
-            <Route path="food-category/manage" element={<ManageFoodCategories />} />
-
-            
-            <Route path="food/add" element={<AddFood />} />
-            <Route path="food/manage" element={<ManageFood />} />
-
-            
-            <Route path="invoices/create" element={<CreateInvoice />} />
-            <Route path="invoices/manage" element={<ManageInvoices />} />
-
-        
-            <Route path="reports" element={<div>Reports Page</div>} />
-            <Route path="settings" element={<div>Settings Page</div>} />
-          </Route>
-        )}
-
-    
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Fallback routes */}
+        <Route path="/404" element={<NotFound />} />
+        <Route
+          path="*"
+          element={
+            isAuthenticated ? (
+              <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
