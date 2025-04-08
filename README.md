@@ -1,4 +1,4 @@
-# FoodHub - Food Ordering System
+# FoodieBites - Food Ordering System
 
 A full-stack food ordering application with user and admin interfaces.
 
