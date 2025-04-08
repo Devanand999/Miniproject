@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../App';
+import { useModal } from '../../contexts/ModalContext';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -7,6 +8,7 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem('userRole');
+  const { showErrorAlert } = useModal();
 
   // Fetch order history
   useEffect(() => {
@@ -44,7 +46,7 @@ const OrderHistory = () => {
       setSelectedOrder(data);
     } catch (err) {
       console.error('Error fetching order details:', err);
-      alert('Failed to load order details. Please try again.');
+      showErrorAlert('Error', 'Failed to load order details. Please try again.');
     }
   };
 

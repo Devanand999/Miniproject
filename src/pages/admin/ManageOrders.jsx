@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../App';
+import { useModal } from '../../contexts/ModalContext';
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -8,6 +9,7 @@ const ManageOrders = () => {
   const [error, setError] = useState(null);
   const [loadingInvoices, setLoadingInvoices] = useState({});
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const { showErrorAlert, showSuccessAlert } = useModal();
 
   // Fetch all orders
   const fetchOrders = async () => {
@@ -48,7 +50,7 @@ const ManageOrders = () => {
       setSelectedOrder(data);
     } catch (err) {
       console.error('Error fetching order details:', err);
-      alert('Failed to load order details. Please try again.');
+      showErrorAlert('Error', 'Failed to load order details. Please try again.');
     }
   };
 
@@ -75,10 +77,10 @@ const ManageOrders = () => {
         setSelectedOrder(updatedOrder);
       }
       
-      alert(`Order status updated to "${newStatus}"`);
+      showSuccessAlert('Status Updated', `Order status updated to "${newStatus}"`);
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Failed to update order status. Please try again.');
+      showErrorAlert('Error', 'Failed to update order status. Please try again.');
     }
   };
 
@@ -126,7 +128,7 @@ const ManageOrders = () => {
       
     } catch (err) {
       console.error('Error fetching invoice:', err);
-      alert(err.message || 'Failed to fetch invoice. Please try again.');
+      showErrorAlert('Error', err.message || 'Failed to fetch invoice. Please try again.');
     } finally {
       setLoadingInvoices(prev => ({ ...prev, [order.id]: false }));
     }

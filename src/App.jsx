@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ModalProvider } from './contexts/ModalContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -50,77 +51,79 @@ function App() {
   );
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Route */}
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
-            ) : (
-              <Login setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />
-            )
-          }
-        />
+    <ModalProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Route */}
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
+                <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+              ) : (
+                <Login setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />
+              )
+            }
+          />
 
-        {/* User Routes */}
-        <Route path="/" element={
-          isAuthenticated && userRole === 'user' ? (
-            <UserLayout />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }>
-          <Route index element={<Navigate to="/menu" replace />} />
-          <Route path="menu" element={<Menu />} />
-          <Route path="cart" element={<Cart />} />
-          <Route path="orders" element={<OrderHistory />} />
-        </Route>
-
-        {/* Checkout route - separate from UserLayout for a cleaner checkout experience */}
-        <Route
-          path="/checkout"
-          element={
+          {/* User Routes */}
+          <Route path="/" element={
             isAuthenticated && userRole === 'user' ? (
-              <CheckoutPage />
+              <UserLayout />
             ) : (
               <Navigate to="/login" replace />
             )
-          }
-        />
+          }>
+            <Route index element={<Navigate to="/menu" replace />} />
+            <Route path="menu" element={<Menu />} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="orders" element={<OrderHistory />} />
+          </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          isAuthenticated && userRole === 'admin' ? (
-            <DashboardLayout />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          
-          <Route path="categories" element={<CategoryPage />} />
-          <Route path="food-items" element={<FoodItemsPage />} />
-          <Route path="orders" element={<ManageOrders />} />
-          {/* <Route path="invoices" element={<ManageInvoices />} /> */}
-        </Route>
+          {/* Checkout route - separate from UserLayout for a cleaner checkout experience */}
+          <Route
+            path="/checkout"
+            element={
+              isAuthenticated && userRole === 'user' ? (
+                <CheckoutPage />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
 
-        {/* Fallback routes */}
-        <Route path="/404" element={<NotFound />} />
-        <Route
-          path="*"
-          element={
-            isAuthenticated ? (
-              <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            isAuthenticated && userRole === 'admin' ? (
+              <DashboardLayout />
             ) : (
               <Navigate to="/login" replace />
             )
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+          }>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            
+            <Route path="categories" element={<CategoryPage />} />
+            <Route path="food-items" element={<FoodItemsPage />} />
+            <Route path="orders" element={<ManageOrders />} />
+            {/* <Route path="invoices" element={<ManageInvoices />} /> */}
+          </Route>
+
+          {/* Fallback routes */}
+          <Route path="/404" element={<NotFound />} />
+          <Route
+            path="*"
+            element={
+              isAuthenticated ? (
+                <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </ModalProvider>
   );
 }
 

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PaymentProcessor from '../components/PaymentProcessor';
 import OrderReceipt from '../components/OrderReceipt';
 import { API_URL } from '../App';
+import { useModal } from '../contexts/ModalContext';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const CheckoutPage = () => {
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
   const [orderError, setOrderError] = useState(null);
   const userId = localStorage.getItem('userRole');
+  const { showConfirmationModal } = useModal();
   
   // In a real app, this would come from cart state or API
   // For now, create a sample order
@@ -110,9 +112,13 @@ const CheckoutPage = () => {
 
   const handleCancel = () => {
     // Show confirmation before canceling
-    if (window.confirm('Are you sure you want to cancel your order?')) {
-      navigate('/');
-    }
+    showConfirmationModal(
+      'Cancel Order',
+      'Are you sure you want to cancel your order?',
+      () => {
+        navigate('/');
+      }
+    );
   };
 
   if (isProcessingOrder) {

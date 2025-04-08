@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../App';
+import { useModal } from '../../contexts/ModalContext';
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
@@ -7,6 +8,7 @@ const CategoryPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showSuccessAlert, showErrorAlert, showConfirmationModal } = useModal();
 
   // Fetch all categories
   const fetchCategories = async () => {
@@ -44,7 +46,7 @@ const CategoryPage = () => {
     e.preventDefault();
     
     if (!newCategory.name.trim()) {
-      alert('Category name is required');
+      showErrorAlert('Validation Error', 'Category name is required');
       return;
     }
     
@@ -66,34 +68,41 @@ const CategoryPage = () => {
       setNewCategory({ name: '', description: '' });
       setIsAdding(false);
       
-      alert('Category added successfully!');
+      showSuccessAlert('Success', 'Category added successfully!');
     } catch (err) {
       console.error('Error adding category:', err);
-      alert(err.message);
+      showErrorAlert('Error', err.message);
     }
   };
 
   // Delete category
   const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) {
-      return;
-    }
+    showConfirmationModal(
+      'Confirm Deletion', 
+      'Are you sure you want to delete this category?',
+      async () => {
+        try {
+          const response = await fetch(`${API_URL}/categories/${id}/`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`${API_URL}/categories/${id}/`, {
-        method: 'DELETE',
-      });
+          if (!response.ok) {
+            // Check if there's a structured error response
+            if (response.headers.get('content-type')?.includes('application/json')) {
+              const errorData = await response.json();
+              throw new Error(errorData.detail || 'Failed to delete category');
+            }
+            throw new Error('Failed to delete category');
+          }
 
-      if (!response.ok) {
-        throw new Error('Failed to delete category');
+          setCategories(categories.filter(category => category.id !== id));
+          showSuccessAlert('Success', 'Category deleted successfully!');
+        } catch (err) {
+          console.error('Error deleting category:', err);
+          showErrorAlert('Error', err.message);
+        }
       }
-
-      setCategories(categories.filter(category => category.id !== id));
-      alert('Category deleted successfully!');
-    } catch (err) {
-      console.error('Error deleting category:', err);
-      alert(err.message);
-    }
+    );
   };
 
   // Toggle add category form

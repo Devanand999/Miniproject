@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../App';
+import { useModal } from '../../contexts/ModalContext';
 
 const FoodItemsPage = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -17,6 +18,7 @@ const FoodItemsPage = () => {
   const [error, setError] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const { showSuccessAlert, showErrorAlert, showConfirmationModal } = useModal();
 
   // Fetch food items
   const fetchFoodItems = async () => {
@@ -77,7 +79,7 @@ const FoodItemsPage = () => {
     e.preventDefault();
     
     if (!newFoodItem.name.trim() || !newFoodItem.price || !newFoodItem.category) {
-      alert('Name, price, and category are required');
+      showErrorAlert('Validation Error', 'Name, price, and category are required');
       return;
     }
     
@@ -108,10 +110,10 @@ const FoodItemsPage = () => {
       });
       setIsAdding(false);
       
-      alert('Food item added successfully!');
+      showSuccessAlert('Success', 'Food item added successfully!');
     } catch (err) {
       console.error('Error adding food item:', err);
-      alert(err.message);
+      showErrorAlert('Error', err.message);
     }
   };
 
@@ -120,7 +122,7 @@ const FoodItemsPage = () => {
     e.preventDefault();
     
     if (!editingItem.name.trim() || !editingItem.price || !editingItem.category) {
-      alert('Name, price, and category are required');
+      showErrorAlert('Validation Error', 'Name, price, and category are required');
       return;
     }
     
@@ -144,10 +146,10 @@ const FoodItemsPage = () => {
       setEditingItem(null);
       setIsEditing(false);
       
-      alert('Food item updated successfully!');
+      showSuccessAlert('Success', 'Food item updated successfully!');
     } catch (err) {
       console.error('Error updating food item:', err);
-      alert(err.message);
+      showErrorAlert('Error', err.message);
     }
   };
 
@@ -166,25 +168,27 @@ const FoodItemsPage = () => {
 
   // Delete food item
   const handleDeleteFoodItem = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this food item?')) {
-      return;
-    }
+    showConfirmationModal(
+      'Confirm Deletion',
+      'Are you sure you want to delete this food item?',
+      async () => {
+        try {
+          const response = await fetch(`${API_URL}/food-items/${id}/`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`${API_URL}/food-items/${id}/`, {
-        method: 'DELETE',
-      });
+          if (!response.ok) {
+            throw new Error('Failed to delete food item');
+          }
 
-      if (!response.ok) {
-        throw new Error('Failed to delete food item');
+          setFoodItems(foodItems.filter(item => item.id !== id));
+          showSuccessAlert('Success', 'Food item deleted successfully!');
+        } catch (err) {
+          console.error('Error deleting food item:', err);
+          showErrorAlert('Error', err.message);
+        }
       }
-
-      setFoodItems(foodItems.filter(item => item.id !== id));
-      alert('Food item deleted successfully!');
-    } catch (err) {
-      console.error('Error deleting food item:', err);
-      alert(err.message);
-    }
+    );
   };
 
   // Toggle availability
@@ -201,25 +205,30 @@ const FoodItemsPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update food item');
+        throw new Error('Failed to update availability');
       }
 
-      const updatedItem = await response.json();
-      setFoodItems(foodItems.map(item => 
-        item.id === id ? updatedItem : item
-      ));
+      // Update local state to reflect change
+      setFoodItems(
+        foodItems.map(item => 
+          item.id === id 
+            ? { ...item, is_available: !currentStatus } 
+            : item
+        )
+      );
     } catch (err) {
       console.error('Error updating availability:', err);
-      alert(err.message);
+      showErrorAlert('Error', err.message);
     }
   };
 
-  // Toggle add form
+  // Toggle add food item form
   const toggleAddForm = () => {
     setIsAdding(!isAdding);
-    setIsEditing(false);
-    setEditingItem(null);
-    
+    if (isEditing) {
+      setIsEditing(false);
+      setEditingItem(null);
+    }
     if (!isAdding) {
       setNewFoodItem({
         name: '',
@@ -232,7 +241,7 @@ const FoodItemsPage = () => {
     }
   };
 
-  // Find category name by ID
+  // Helper to get category name from ID
   const getCategoryName = (categoryId) => {
     const category = categories.find(cat => cat.id === categoryId);
     return category ? category.name : 'Unknown Category';

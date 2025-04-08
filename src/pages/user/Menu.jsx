@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../App';
+import { useModal } from '../../contexts/ModalContext';
 
 
 const Menu = () => {
@@ -13,6 +14,7 @@ const Menu = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const userId = localStorage.getItem('userRole');
   const [featuredItems, setFeaturedItems] = useState([]);
+  const { showErrorAlert } = useModal();
 
   // Fetch categories
   useEffect(() => {
@@ -116,7 +118,7 @@ const Menu = () => {
       
     } catch (err) {
       console.error('Error adding to cart:', err);
-      alert('Failed to add item to cart. Please try again.');
+      showErrorAlert('Error', 'Failed to add item to cart. Please try again.');
     }
   };
 

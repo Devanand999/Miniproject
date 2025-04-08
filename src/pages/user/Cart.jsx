@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../App';
-
+import { useModal } from '../../contexts/ModalContext';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -9,6 +9,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem('userRole');
+  const { showErrorAlert } = useModal();
 
   // Fetch cart data
   const fetchCart = async () => {
@@ -50,7 +51,7 @@ const Cart = () => {
       setCart(updatedCart);
     } catch (err) {
       console.error('Error updating quantity:', err);
-      alert('Failed to update quantity. Please try again.');
+      showErrorAlert('Error', 'Failed to update quantity. Please try again.');
     }
   };
 
@@ -71,14 +72,14 @@ const Cart = () => {
       setCart(updatedCart);
     } catch (err) {
       console.error('Error removing item:', err);
-      alert('Failed to remove item. Please try again.');
+      showErrorAlert('Error', 'Failed to remove item. Please try again.');
     }
   };
 
   // Proceed to checkout
   const handleCheckout = () => {
     if (!cart || !cart.cart_items || cart.cart_items.length === 0) {
-      alert('Your cart is empty. Add some items before checking out.');
+      showErrorAlert('Empty Cart', 'Your cart is empty. Add some items before checking out.');
       return;
     }
     
