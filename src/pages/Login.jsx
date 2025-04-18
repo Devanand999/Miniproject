@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ setIsAuthenticated, setUserRole }) => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
 
   // Static users for simple authentication
   const users = [
-    { email: 'admin@example.com', password: 'admin123', role: 'admin' },
-    { email: 'user@example.com', password: 'user123', role: 'user' }
+    { email: "admin@example.com", password: "admin123", role: "admin" },
+    { email: "user@example.com", password: "user123", role: "user" },
   ];
 
   const handleChange = (e) => {
@@ -18,42 +18,45 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!credentials.email || !credentials.password) {
-      setError('Please enter both email and password.');
+      setError("Please enter both email and password.");
       return;
     }
 
     const user = users.find(
-      (u) => u.email === credentials.email && u.password === credentials.password
+      (u) =>
+        u.email === credentials.email && u.password === credentials.password
     );
 
     if (user) {
       // Set authentication state in both context and localStorage
       setIsAuthenticated(true);
       setUserRole(user.role);
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userRole', user.role);
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("userRole", user.role);
 
       // Navigate to appropriate dashboard
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
       } else {
-        navigate('/menu');
+        navigate("/menu");
       }
     } else {
-      setError('Invalid email or password.');
+      setError("Invalid email or password.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center text-lime-600">Food Ordering Platform</h2>
-        
+        <h2 className="text-2xl font-bold mb-6 text-center text-lime-600">
+          Food Ordering Platform
+        </h2>
+
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700">Email</label>
@@ -85,8 +88,19 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
           >
             Login
           </button>
+          <div className="flex justify-center">
+            <span>
+              Don't have an account? {" "}
+              <span
+                onClick={() => navigate("/signup")}
+                className="text-green-500 hover:underline cursor-pointer"
+              >
+                Signup here
+              </span>
+            </span>
+          </div>
         </form>
-        
+
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Demo accounts:</p>
           <p>Admin: admin@example.com / admin123</p>
@@ -97,4 +111,4 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
   );
 };
 
-export default Login; 
+export default Login;

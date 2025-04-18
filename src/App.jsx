@@ -17,6 +17,7 @@ import Cart from './pages/user/Cart';
 import OrderHistory from './pages/user/OrderHistory';
 import CheckoutPage from './pages/CheckoutPage';
 import UserLayout from './layouts/UserLayout';
+import Signup from './pages/signup';
 
 export const API_URL = 'http://localhost:8000/api'; 
 
@@ -62,6 +63,16 @@ function App() {
                 <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
               ) : (
                 <Login setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              isAuthenticated ? (
+                <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/menu'} replace />
+              ) : (
+                <Signup />
               )
             }
           />
