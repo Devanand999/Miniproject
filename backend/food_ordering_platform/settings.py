@@ -80,7 +80,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'food_ordering_platform.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
